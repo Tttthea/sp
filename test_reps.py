@@ -92,10 +92,11 @@ def gen_feat(path, hop_length, sr):
             data['gender'] = 0
         if type == "males":
             data['gender'] = 1
-        datanames = read_path(path + "/" + type)
+        current_path = path + "/" + type
+        datanames = read_path(current_path)
         for dataname in datanames:
             if os.path.splitext(dataname)[1] == ('.m4a' or '.wav'):
-                audio_path = path + "/" + dataname
+                audio_path = current_path + "/" + dataname
                 lib_data = read_audio(audio_path, sr)
                 y, sr = lib_data['y'], lib_data['sr']
                 f0 = feat_f0(y)
