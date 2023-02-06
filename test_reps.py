@@ -15,6 +15,7 @@ from sklearn.utils import shuffle
 
 
 def feat_mel_freq(y, hop_length, sr):
+    """generate mfcc relevant features"""
     mfcc = librosa.feature.mfcc(y=y, sr=sr, hop_length=hop_length, n_mfcc=13)
     mfcc_delta = librosa.feature.delta(mfcc)
     mel_freq_features = np.round(
@@ -62,6 +63,7 @@ def feat_mel_freq(y, hop_length, sr):
 
 
 def feat_f0(y):
+    """generate f0 relevant features"""
     f0 = librosa.yin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
     f0_features = np.round(
         np.array([np.amin(f0), np.amax(f0), np.mean(f0), np.std(f0), np.median(f0), kurtosis(f0), skew(f0)]), 4)
@@ -69,31 +71,43 @@ def feat_f0(y):
 
 
 def read_path(path):
+    """read files as a list under path"""
     return os.listdir(path)
 
 
 def read_audio(path, sr):
+    """read audio from path using librosa"""
     y, sr = librosa.load(path, sr=sr, mono=True, offset=0.8, duration=None)
-    lib_data = {y:y, sr:sr}
+    lib_data = {"y": y, "sr": sr}
     return lib_data
 
-
-def gen_feat(sex, path, hop_length):
-    data = {"f0": [], "mfcc": [], "spec": [], "gender": sex}
-    datanames = read_path(path)
-    for dataname in datanames:
-        if os.path.splitext(dataname)[1] == ('.m4a' or '.wav'):
-            audio_path = path + "/" + dataname
-            lib_data = read_audio(audio_path, sr)
-            y, sr = lib_data['y'], lib_data['sr']
-            f0 = feat_f0(y)
-            mfcc = feat_mel_freq(y, hop_length, sr)
-            data['f0'].append(f0)
-            data['mfcc'].append(mfcc)
-    return data
+# /content/sp/VoxCeleb_gender
+def gen_feat(path, hop_length, sr):
+    """generate all features"""
+    folders = read_path(path)
+    feats = []
+    for type in folders:
+        data = {"f0": [], "mfcc": [], "spec": [], "gender": None}
+        if type == "females":
+            data['gender'] = 0
+        if type == "males":
+            data['gender'] = 1
+        datanames = read_path(path + "/" + type)
+        for dataname in datanames:
+            if os.path.splitext(dataname)[1] == ('.m4a' or '.wav'):
+                audio_path = path + "/" + dataname
+                lib_data = read_audio(audio_path, sr)
+                y, sr = lib_data['y'], lib_data['sr']
+                f0 = feat_f0(y)
+                mfcc = feat_mel_freq(y, hop_length, sr)
+                data['f0'].append(f0)
+                data['mfcc'].append(mfcc)
+        feats.append(data)
+    return feats
 
 
 def gen_df(data_dic):
+    """transform features to dataframe"""
     d = pd.DataFrame(data_dic)
     m1 = d['f0'].apply(pd.Series,
                        index=['f0_min', 'f0_max', 'f0_mean', 'f0_std', 'f0_median', 'f0_kurtosis', 'f0_skew'])
@@ -104,22 +118,29 @@ def gen_df(data_dic):
 
 
 def df2csv(df):
-    df_csv = df.to_csv(index=False)
-    return df_csv
+    """transform dataframe to csv"""
+    df.to_csv(index=False)
+
 
 
 def merge_df(df_list):
+    """merge dataframe list"""
     df = pd.Dataframe()
     for i in len(df_list):
         df.append(df_list[i])
     return df
 
 
-def feat_engineering(path, sex, hop_length):
-    feats = gen_feat(sex, path, hop_length)
-    df = gen_df(feats)
-    df_shuffled = shuffle(df)
-    return df_shuffled
+def feat_engineering(path, hop_length=512, sr=22050):
+    """initial function"""
+    feats = gen_feat(path, hop_length, sr)
+    dfs = []
+    for feature in feats:
+        df = gen_df(feature)
+        dfs.append(df)
+    df_all = merge_df(dfs)
+    df_shuffled = shuffle(df_all)
+    df2csv(df_shuffled)
 
 
 #
