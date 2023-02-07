@@ -12,7 +12,8 @@ import librosa
 
 import librosa.display
 from sklearn.utils import shuffle
-
+import warnings
+warnings.filterwarnings('ignore')
 
 def feat_mel_freq(y, hop_length, sr):
     """generate mfcc relevant features"""
@@ -87,7 +88,7 @@ def gen_feat(path, hop_length, sr):
     folders = read_path(path)
     feats = []
     for type in folders:
-        data = {"f0": [], "mfcc": [], "spec": [], "gender": None}
+        data = {"f0": [], "mfcc": [], "gender": None}
         if type == "females":
             data['gender'] = 0
         if type == "males":
@@ -95,7 +96,7 @@ def gen_feat(path, hop_length, sr):
         current_path = path + "/" + type
         datanames = read_path(current_path)
         for dataname in datanames:
-            if os.path.splitext(dataname)[1] == ('.m4a' or '.wav'):
+            if os.path.splitext(dataname)[1] == ('.m4a' or '.wav' or '.mp3'):
                 audio_path = current_path + "/" + dataname
                 lib_data = read_audio(audio_path, sr)
                 y, sr = lib_data['y'], lib_data['sr']
@@ -103,7 +104,7 @@ def gen_feat(path, hop_length, sr):
                 mfcc = feat_mel_freq(y, hop_length, sr)
                 data['f0'].append(f0)
                 data['mfcc'].append(mfcc)
-        feats.append(data)
+                feats.append(data)
     return feats
 
 
@@ -136,6 +137,7 @@ def feat_engineering(path, hop_length=512, sr=22050):
     """initial function"""
     feats = gen_feat(path, hop_length, sr)
     dfs = []
+    print(feats)
     for feature in feats:
         df = gen_df(feature)
         dfs.append(df)
