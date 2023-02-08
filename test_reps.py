@@ -60,7 +60,6 @@ def read_audio(path, sr):
 def gen_feat(path, hop_length, sr):
     """generate all features"""
     folders = read_path(path)
-    feats = []
     for type in folders:
         data = {"f0": [], "mfcc": [], "gender": None}
         if type == "females":
@@ -78,8 +77,8 @@ def gen_feat(path, hop_length, sr):
                 mfcc = feat_mel_freq(y, hop_length, sr)
                 data['f0'].append(f0)
                 data['mfcc'].append(mfcc)
-                feats.append(data)
-    return feats
+
+    return data
 
 
 def gen_df(data_dic):
@@ -99,25 +98,12 @@ def df2csv(df):
 
 
 
-def merge_df(df_list):
-    """merge dataframe list"""
-    df = pd.Dataframe()
-    for i in len(df_list):
-        df.append(df_list[i])
-    return df
-
 
 def feat_engineering(path, hop_length=512, sr=22050):
     """initial function"""
-    feats = gen_feat(path, hop_length, sr)
-    dfs = []
-    print(feats)
-    for feature in feats:
-        df = gen_df(feature)
-        dfs.append(df)
-    df_all = merge_df(dfs)
-    df_shuffled = shuffle(df_all)
-    df2csv(df_shuffled)
+    data = gen_feat(path, hop_length, sr)
+    df = gen_df(data)
+    df2csv(df)
 
 
 #
