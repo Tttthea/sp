@@ -60,12 +60,8 @@ def read_audio(path, sr):
 def gen_feat(path, hop_length, sr):
     """generate all features"""
     folders = read_path(path)
+    data = {"f0": [], "mfcc": [], "gender": []}
     for type in folders:
-        data = {"f0": [], "mfcc": [], "gender": None}
-        if type == "females":
-            data['gender'] = 0
-        if type == "males":
-            data['gender'] = 1
         current_path = path + "/" + type
         datanames = read_path(current_path)
         for dataname in datanames:
@@ -77,6 +73,10 @@ def gen_feat(path, hop_length, sr):
                 mfcc = feat_mel_freq(y, hop_length, sr)
                 data['f0'].append(f0)
                 data['mfcc'].append(mfcc)
+                if type == "females":
+                    data['gender'].append(0)
+                if type == "males":
+                    data['gender'].append(1)
 
     return data
 
