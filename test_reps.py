@@ -94,7 +94,7 @@ def gen_df(data_dic):
 
 def df2csv(df):
     """transform dataframe to csv"""
-    df.to_csv(index=False)
+    df.to_csv('./df.csv')
 
 
 
@@ -103,7 +103,7 @@ def feat_engineering(path, hop_length=512, sr=22050):
     """initial function"""
     data = gen_feat(path, hop_length, sr)
     df = gen_df(data)
-    df2csv(df)
+    df2csv()
 
 
 #
