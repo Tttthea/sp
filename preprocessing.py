@@ -96,6 +96,18 @@ def feat_engineering(path, hop_length=512, sr=22050):
 
 if __name__ == '__main__':
     import sys
-    feat_engineering(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+    if len(sys.argv) == 0:
+        print("please run code")
+    elif len(sys.argv) == 1:
+        print("please input project path")
+    elif len(sys.argv) == 2:
+        feat_engineering(sys.argv[1])
+    elif len(sys.argv) == 3:
+        feat_engineering(sys.argv[1], int(sys.argv[2]))
+    elif len(sys.argv) == 4:
+        feat_engineering(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+    else:
+        print("wrong input")
+
 
 
