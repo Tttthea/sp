@@ -1,24 +1,16 @@
 import pandas as pd
 import numpy as np
-import json
 import os
-import scipy.io.wavfile
-import matplotlib.pyplot as plt
-from IPython.display import Audio
-import IPython.display as ipd
-import scipy.misc
 from scipy.stats import skew, kurtosis
 import librosa
-
 import librosa.display
-from sklearn.utils import shuffle
 import warnings
 warnings.filterwarnings('ignore')
 
 def feat_mel_freq(y, hop_length, sr):
     """generate mfcc relevant features"""
     mfcc = librosa.feature.mfcc(y=y, sr=sr, hop_length=hop_length, n_mfcc=13)
-    mfcc_delta = librosa.feature.delta(mfcc)
+    # mfcc_delta = librosa.feature.delta(mfcc)
     mel_freq_features = np.round(
         np.array([np.mean(mfcc[0]), np.std(mfcc[0]), np.amin(mfcc[0]), np.amax(mfcc[0]), np.median(mfcc[0]),
                   np.mean(mfcc[1]), np.std(mfcc[1]), np.amin(mfcc[1]), np.amax(mfcc[1]), np.median(mfcc[1]),
@@ -33,7 +25,6 @@ def feat_mel_freq(y, hop_length, sr):
                   np.mean(mfcc[10]), np.std(mfcc[10]), np.amin(mfcc[10]), np.amax(mfcc[10]), np.median(mfcc[10]),
                   np.mean(mfcc[11]), np.std(mfcc[11]), np.amin(mfcc[11]), np.amax(mfcc[11]), np.median(mfcc[11]),
                   np.mean(mfcc[12]), np.std(mfcc[12]), np.amin(mfcc[12]), np.amax(mfcc[12]), np.median(mfcc[12])]), 4)
-
     return mel_freq_features
 
 
@@ -56,7 +47,7 @@ def read_audio(path, sr):
     lib_data = {"y": y, "sr": sr}
     return lib_data
 
-# /content/sp/VoxCeleb_gender
+
 def gen_feat(path, hop_length, sr):
     """generate all features"""
     folders = read_path(path)
@@ -77,7 +68,6 @@ def gen_feat(path, hop_length, sr):
                     data['gender'].append(0)
                 if type == "males":
                     data['gender'].append(1)
-
     return data
 
 
@@ -97,12 +87,15 @@ def df2csv(df):
     df.to_csv('./df.csv')
 
 
-
-
 def feat_engineering(path, hop_length=512, sr=22050):
     """initial function"""
     data = gen_feat(path, hop_length, sr)
     df = gen_df(data)
     df2csv(df)
+
+
+if __name__ == '__main__':
+    import sys
+    feat_engineering(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
 
 
