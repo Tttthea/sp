@@ -94,7 +94,7 @@ def gen_df(data_dic):
 
 def df2csv(df):
     """transform dataframe to csv"""
-    df.to_csv(index=False)
+    df.to_csv('./df.csv')
 
 
 
