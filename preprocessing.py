@@ -76,7 +76,13 @@ def gen_df(data_dic):
     d = pd.DataFrame(data_dic)
     m1 = d['f0'].apply(pd.Series,
                        index=['f0_min', 'f0_max', 'f0_mean', 'f0_std', 'f0_median', 'f0_kurtosis', 'f0_skew'])
-    m2 = d['mfcc'].apply(pd.Series)
+    mfcc_indice = [x for x in range(13)]
+    stats = ['mean', 'std', 'min', 'max', 'median']
+    cols = []
+    for i in mfcc_indice:
+        for s in stats:
+            cols.append("mfcc_" + str(i) + "_" + s)
+    m2 = d['mfcc'].apply(pd.Series, index=cols)
     m2['gender'] = d['gender']
     df = pd.concat([m1, m2], axis=1)
     return df
