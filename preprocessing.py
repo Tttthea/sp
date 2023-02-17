@@ -43,7 +43,7 @@ def read_path(path):
 
 def read_audio(path, sr):
     """read audio from path using librosa"""
-    y, sr = librosa.load(path, sr=sr, mono=True, offset=0.8, duration=None)
+    y, sr = librosa.load(path, sr=sr, mono=True, offset=0.8, duration=3.0)
     lib_data = {"y": y, "sr": sr}
     return lib_data
 
