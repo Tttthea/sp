@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 
 def feat_mel_freq(y, hop_length, sr):
     """generate mfcc relevant features"""
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, hop_length=hop_length, n_mfcc=13)
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, hop_length=hop_length, n_mfcc=13, n_fft=441)
     # mfcc_delta = librosa.feature.delta(mfcc)
     mel_freq_features = np.round(
         np.array([np.mean(mfcc[0]), np.std(mfcc[0]), np.amin(mfcc[0]), np.amax(mfcc[0]), np.median(mfcc[0]),
@@ -93,7 +93,7 @@ def df2csv(df):
     df.to_csv('./df.csv')
 
 
-def feat_engineering(path, hop_length=512, sr=22050):
+def feat_engineering(path, hop_length=220, sr=22050):
     """initial function"""
     data = gen_feat(path, hop_length, sr)
     df = gen_df(data)
