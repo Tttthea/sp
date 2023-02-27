@@ -42,32 +42,58 @@ def read_path(path):
 
 
 def read_audio(path, sr):
-    """read audio from path using librosa"""
-    y, sr = librosa.load(path, sr=sr, mono=True, offset=0.8, duration=6.0)
+    """read audio from path using librosa, only remain first 6 seconds"""
+    y, sr = librosa.load(path, sr=sr, mono=True, duration=6.0)
     lib_data = {"y": y, "sr": sr}
     return lib_data
+
+
+def read_audio_female(path, sr):
+    """read audio with windowing, remain all"""
+    length = librosa.get_duration(path)
+    ys = []
+    if length <= 6:
+        y, sr = librosa.load(path, sr=sr, mono=True, duration=6.0)
+        ys.append(y)
+    else:
+        for i in range(0, length, 0.1):
+            y, sr = librosa.load(path, sr=sr, mono=True, duration=6.0, offset=i)
+            ys.append(y)
+
+    return ys
 
 
 def gen_feat(path, hop_length, sr):
     """generate all features"""
     folders = read_path(path)
-    data = {"f0": [], "mfcc": [], "gender": []}
+
+    data = {"ys": [], "gender": []}
+    data_fin = {"f0": [], "mfcc": [], "gender": []}
+
     for type in folders:
         current_path = path + "/" + type
         datanames = read_path(current_path)
         for dataname in datanames:
             if os.path.splitext(dataname)[1] == ('.m4a' or '.wav' or '.mp3'):
                 audio_path = current_path + "/" + dataname
-                lib_data = read_audio(audio_path, sr)
-                y, sr = lib_data['y'], lib_data['sr']
-                f0 = feat_f0(y)
-                mfcc = feat_mel_freq(y, hop_length, sr)
-                data['f0'].append(f0)
-                data['mfcc'].append(mfcc)
                 if type == "females":
                     data['gender'].append(0)
+                    female_ys = read_audio_female(audio_path, sr)
+                    data['ys'].extend(female_ys)
+
                 if type == "males":
                     data['gender'].append(1)
+                    lib_data = read_audio(audio_path, sr)
+                    y = lib_data['y']
+                    data['ys'].append(y)
+
+    for y, sex in zip(data['ys'], data['gender']):
+        f0 = feat_f0(y)
+        mfcc = feat_mel_freq(y, hop_length, sr)
+        data_fin['f0'].append(f0)
+        data_fin['mfcc'].append(mfcc)
+        data_fin['gender'].append(sex)
+
     return data
 
 
